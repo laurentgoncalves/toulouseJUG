@@ -1,0 +1,69 @@
+= Suivez le lapin blanc ! Exploration au coeur de la JVM
+:toc:
+:toclevels: 3
+:toc-placement: preamble
+:lb: pass:[<br> +]
+:imagesdir: images
+:icons: font
+:source-highlighter: highlightjs
+
+Par Sylvain Wallez @bluxte
+
+==  Optimiser 6 lignes de code
+La méthode values() sur une classe d'enum alloue de la mémoire
+1ere idée : mettre en place un FastPath : traiter les cas les plus courants par des if avant de chercher dans les values
+cf article de SYlvain dans son blog "Micro benchmarks can make you short-sighted"
+
+== Profiling mémoire
+* Utilisation mémoire
+   * jmap
+* Pression sur le Garbage collector
+   * java mission control / jmap
+
+Parcours tous les objets en mémoire et fait un histogramme des objets utilisés :
+----
+jmap -histo
+----
+
+Fait un garbage collector avant de faire l'histogramme :
+----
+jmap -histo:live
+----
+
+Presion sur les garbage collector : Quand on alloue énormément et qu'on jette les objets tout de suite
+
+=== Java mission control
+Java Flight Recorder : agent de monitoring : impact de 1% max sur les perfs donc utilisable en production
+au démarrage : -XX:+UnlockCommercialFeatures
+après le démarrage : jcmd <pid> VM.unlock_commercial_features
+jcmd permet d'exécuter pas mal de commandes dont celles de jmap
+Les garbage collector créent des dommages collatéraux : vidage des caches qui ont des weak references juste parce que on consomme de la mémoire sans faire attention
+
+=== Analyser le bytecode
+pour voir le bytecode : javap -c fichier.class
+Pour comprendre précisément ce qu'il se passe dans nos méthodes mais aussi dans les méthodes rajoutées par le compilateur.
+Constant pool : Ensemble des constantes utilisées dans le fichier java : String, nom des méthodes, ...
+
+=== Benchmarking with JMH
+JMH : projet openJDK
+Fournit une structure pour écrire les tests
+Préchauffe la JVM avant de faire le benchmarks
+
+Carrot HPPC : High performance primitive collections : librairie qui fournit des structures de données (map, ...) travaillant sur des types primitifs évitant ainsi de passer par des Objets comme sur les HashMap
+
+Les dangers de JMH :
+
+* Peut mener à des optimisations partielles
+* Prend du temps pour chasser des microsecondes
+
+Avant d'attaquer des benchmarks, prendre du recul pour savoir quoi optimiser.
+
+== Les méthodes intrinsèques
+"Ce que vous voyez n'est pas ce que vous aurez"
+la JVM intercepte certains appels de méthode pour appeler une version native optimisée de la méthode (inlining, ...)
+exemple : String.indexOf est optimisée pour les chaines de + de 8 caractères
+Les méthodes intrinsèques sont des implémentations en assembleur des méthodes dans certaines conf (x86, ...)
+Donc attention quand vous regardez le code source du JDK car ce n'est pas forcément ce qui est exécuté par la JVM.
+
+== Conclusion
+* Apprenez à utiliser vos outils
