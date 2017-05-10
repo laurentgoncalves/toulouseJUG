@@ -8,6 +8,12 @@
 :source-highlighter: highlightjs
 
 Par Sylvain Wallez @bluxte
+ifdef::env-github[]
+https://m.youtube.com/watch?v=87WZIZQvil4[Vidéo de la présentation Youtube]
+endif::[]
+== PITCH
+Comment passe-t-on de votre code Java à l'assembleur qui le fait fonctionner ? Manipuler des concepts de haut niveau nous a fait oublier ce qui se passe "sous le capot", qui est pourtant une des clés pour écrire du code efficace.
+A partir de quelques lignes de Java, nous partirons en exploration dans les différentes couches qui participent à l'exécution de votre code : JRE, byte code, structure de la JVM OpenJDK, JIT, HotSpot, méthodes intrinsèques, assembleur généré... Une présentation de vulgarisation accessible à tous, dont l'objectif est de susciter votre curiosité pour que vous aussi, vous partiez en exploration !
 
 ==  Optimiser 6 lignes de code
 La méthode values() sur une classe d'enum alloue de la mémoire
